@@ -70,6 +70,20 @@ data "aws_subnets" "default" {
   }
 }
 
+resource "aws_lb_listener_rule" "asg" {
+  listener_arn = aws_lb_listener.http.arn
+  priority = 100
+  condition {
+    path_pattern {
+      values = ["*"]
+    }
+  }
+  action {
+    type = "forward"
+    target_group_arn = aws_lb_target_group.asg.arn
+  }
+}
+
 resource "aws_lb" "example" {
   name = "terraform-asg-example"
   load_balancer_type = "application"
@@ -123,4 +137,9 @@ resource "aws_lb_target_group" "asg" {
     healthy_threshold = 2
     unhealthy_threshold = 2
   }
+}
+
+output "alb_dns_name" {
+  value = aws_lb.example.dns_name
+  description = "the domain name of the load balancer"
 }
